@@ -10,7 +10,7 @@ async def lifespan(app: FastAPI):
     # Startup
     try:
         neo4j_client.connect()
-        print("Database connection successfull.")
+        print("Initialization successfull.")
     except Exception as e:
         print(f"Failed to initialize database: {e}")
         raise

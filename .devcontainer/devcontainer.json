@@ -2,8 +2,7 @@
   "name": "Neo4j Interview Project",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
-  "workspaceFolder": "/workspace",
-  "forwardPorts": [8000, 3000, 7474, 7687],
+  "workspaceFolder": "/workspace",  "forwardPorts": [8000, 3000],
   "portsAttributes": {
     "8000": {
       "label": "FastAPI",
@@ -12,14 +11,6 @@
     "3000": {
       "label": "React App",
       "onAutoForward": "notify"
-    },
-    "7474": {
-      "label": "Neo4j Browser",
-      "onAutoForward": "notify"
-    },
-    "7687": {
-      "label": "Neo4j Bolt",
-      "onAutoForward": "ignore"
     }
   },
   "customizations": {

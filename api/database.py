@@ -5,33 +5,55 @@ from typing import List
 from models import Employee, EmployeeWithRelationships, Relationship
 
 class Neo4jClient:   
-    """Singleton class to manage Neo4j database connection and operations""" 
+    """Singleton class to manage Neo4j database connection and operations"""
+    
     def __init__(self):
         # Try to load local .env file for development outside container
         #if os.path.exists('.env.local'):
         #    from dotenv import load_dotenv
         #    load_dotenv('.env.local')
         
-        # Check if we're in the dev container
-        self.uri = os.getenv("NEO4J_URI")        
-        self.username = os.getenv("NEO4J_USERNAME")
-        self.password = os.getenv("NEO4J_PASSWORD")
-        self.database = os.getenv("NEO4J_DATABASE")
+        # Get the Neo4j URI and try different connection strategies
+        self.uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+        self.username = os.getenv("NEO4J_USERNAME", "neo4j")
+        self.password = os.getenv("NEO4J_PASSWORD", "password")
+        self.database = os.getenv("NEO4J_DATABASE", "neo4j")
         self.driver = None
         
+        # Store fallback URIs for different scenarios
+        self.fallback_uris = [
+            self.uri,  # Original URI from environment
+            "bolt://localhost:8888",  # Dev container port forwarding
+            "bolt://host.docker.internal:8888",  # Docker Desktop
+            "bolt://neo4j-gds:7687",  # Direct container name
+        ]
+        
     def connect(self):
-        try:
-            self.driver = GraphDatabase.driver(
-                self.uri, 
-                auth=(self.username, self.password)
-            )
-            # Test the connection
-            with self.driver.session(database=self.database) as session:
-                session.run("RETURN 1")
-            print(f"Connected to Neo4j at {self.uri}")
-        except Exception as e:
-            print(f"Failed to connect to Neo4j: {e}")
-            raise
+        """Try to connect to Neo4j using different URI strategies"""
+        last_error = None
+        
+        for uri in self.fallback_uris:
+            try:
+                print(f"Attempting to connect to Neo4j at {uri}")
+                self.driver = GraphDatabase.driver(
+                    uri, 
+                    auth=(self.username, self.password)
+                )
+                # Test the connection
+                with self.driver.session(database=self.database) as session:
+                    session.run("RETURN 1")
+                print(f"Successfully connected to Neo4j at {uri}")
+                self.uri = uri  # Store the successful URI
+                return
+            except Exception as e:
+                print(f"Failed to connect to {uri}: {e}")
+                last_error = e
+                if self.driver:
+                    self.driver.close()
+                    self.driver = None
+        
+        # If all attempts failed, raise the last error
+        raise Exception(f"Could not connect to Neo4j after trying all URIs. Last error: {last_error}")
     
     def close(self):
         if self.driver:
