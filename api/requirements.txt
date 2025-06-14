@@ -1,0 +1,5 @@
+fastapi[standard]==0.115.8
+neo4j==5.14.1
+pydantic==2.8.1
+python-dotenv==1.0.0
+pytest==8.3.4

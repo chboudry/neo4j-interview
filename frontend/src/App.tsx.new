@@ -1,0 +1,189 @@
+import React, { useState, useEffect } from 'react';
+import './index.css';
+import { Employee, EmployeeWithRelationships, EmployeeNetworkResponse } from './types';
+
+const API_BASE_URL = 'http://localhost:8000';
+
+function App() {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employeeNetwork, setEmployeeNetwork] = useState<EmployeeWithRelationships[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'basic' | 'relationships'>('basic');
+
+  useEffect(() => {
+    fetchEmployees();
+    fetchEmployeeNetwork();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`${API_BASE_URL}/employees`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setEmployees(data.employees);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while fetching employees');
+      console.error('Error fetching employees:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchEmployeeNetwork = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/employee-network`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data: EmployeeNetworkResponse = await response.json();
+      setEmployeeNetwork(data.employees);
+    } catch (err) {
+      console.error('Error fetching employee network:', err);
+      // Don't set the error state here, so the basic view still works
+    }
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return dateString;
+    }
+  };
+
+  return (
+    <div className="container">
+      <div className="header">
+        <h1>Neo4j Interview Project</h1>
+        <p>Employee Management System</p>
+      </div>
+
+      <div className="card">
+        <div className="tabs">
+          <button 
+            className={`tab ${activeTab === 'basic' ? 'active' : ''}`} 
+            onClick={() => setActiveTab('basic')}
+          >
+            Basic View
+          </button>
+          <button 
+            className={`tab ${activeTab === 'relationships' ? 'active' : ''}`}
+            onClick={() => setActiveTab('relationships')}
+          >
+            Relationship View
+          </button>
+        </div>
+        
+        {loading && <div className="loading">Loading employees...</div>}
+        
+        {error && (
+          <div className="error">
+            <strong>Error:</strong> {error}
+            <br />
+            <button onClick={fetchEmployees} style={{ marginTop: '10px' }}>
+              Retry
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && activeTab === 'basic' && (
+          <div>
+            <h3>Employees ({employees.length})</h3>
+            {employees.length === 0 ? (
+              <p>No employees found in the database.</p>
+            ) : (
+              <div className="employee-grid">
+                {employees.map((employee) => (
+                  <div key={employee.id || employee.name} className="employee-card">
+                    <div className="employee-name">{employee.name}</div>
+                    {employee.email && (
+                      <div className="employee-info">
+                        <strong>Email:</strong> {employee.email}
+                      </div>
+                    )}
+                    {employee.department && (
+                      <div className="employee-info">
+                        <strong>Department:</strong> {employee.department}
+                      </div>
+                    )}
+                    {employee.position && (
+                      <div className="employee-info">
+                        <strong>Position:</strong> {employee.position}
+                      </div>
+                    )}
+                    {employee.hire_date && (
+                      <div className="employee-info">
+                        <strong>Hire Date:</strong> {formatDate(employee.hire_date)}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {!loading && !error && activeTab === 'relationships' && (
+          <div>
+            <h3>Employee Network ({employeeNetwork.length})</h3>
+            {employeeNetwork.length === 0 ? (
+              <p>No employee relationships found in the database.</p>
+            ) : (
+              <div className="employee-grid">
+                {employeeNetwork.map((item) => (
+                  <div key={item.employee.id || item.employee.name} className="employee-relation-card">
+                    <div className="employee-name">{item.employee.name}</div>
+                    
+                    {/* Boss relationship */}
+                    <div className="relationship-section">
+                      <strong>Boss:</strong> {item.boss || 'None'}
+                    </div>
+                    
+                    {/* Direct reports relationship */}
+                    <div className="relationship-section">
+                      <strong>Direct Reports:</strong>
+                      {item.direct_reports && item.direct_reports.length > 0 ? (
+                        <ul className="relationship-list">
+                          {item.direct_reports.map((report, index) => (
+                            <li key={index}>{report}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span> None</span>
+                      )}
+                    </div>
+                    
+                    {/* Friend relationship */}
+                    <div className="relationship-section">
+                      <strong>Friends:</strong>
+                      {item.friends && item.friends.length > 0 ? (
+                        <ul className="relationship-list">
+                          {item.friends.map((friend, index) => (
+                            <li key={index}>{friend}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span> None</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
