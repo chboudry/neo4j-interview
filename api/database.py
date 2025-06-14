@@ -165,14 +165,14 @@ class Neo4jClient:
             print("Cleared existing data")
         
         # Load employees from boss relationships CSV
-        boss_file = "../dataset/employees-and-their-boss.csv"
+        boss_file = "./dataset/employees-and-their-boss.csv"
         if os.path.exists(boss_file):
             self._load_boss_relationships(boss_file)
         else:
             print(f"Boss relationships file not found: {boss_file}")
         
         # Load friend relationships CSV
-        friends_file = "../dataset/employees-and-their-friends.csv"
+        friends_file = "./dataset/employees-and-their-friends.csv"
         if os.path.exists(friends_file):
             self._load_friend_relationships(friends_file)
         else:

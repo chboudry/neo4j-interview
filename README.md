@@ -49,14 +49,25 @@ The project uses two containers:
 - **App Container**: Contains both Python and Node.js for full-stack development
 - **Neo4j Container**: Database with GDS plugin
 
-#### Step 1: Start the API
+#### Step 1: Install Dependencies
+```bash
+# Install Python dependencies
+cd api
+pip install -r requirements.txt
+
+# Install Node.js dependencies  
+cd ../frontend
+npm install
+```
+
+#### Step 2: Start the API
 ```bash
 cd api
 python main.py
 ```
 You should see: `INFO:     Uvicorn running on http://0.0.0.0:8000`
 
-#### Step 2: Start the Frontend (In a new terminal)
+#### Step 3: Start the Frontend (In a new terminal)
 ```bash
 cd frontend
 npm start
