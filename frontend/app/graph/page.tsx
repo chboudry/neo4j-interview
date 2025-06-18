@@ -1,9 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { InteractiveNvlWrapper } from '@neo4j-nvl/react'
+import dynamic from 'next/dynamic'
 import type { MouseEventCallbacks } from '@neo4j-nvl/react'
 import type { HitTargets, Node, Relationship } from '@neo4j-nvl/base'
+
+// Dynamically import the NVL component to prevent SSR issues
+const InteractiveNvlWrapper = dynamic(
+  () => import('@neo4j-nvl/react').then((mod) => ({ default: mod.InteractiveNvlWrapper })),
+  { 
+    ssr: false,
+    loading: () => <div>Loading graph visualization...</div>
+  }
+)
 
 // Define interfaces for our graph data
 interface GraphNode {
