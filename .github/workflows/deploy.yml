@@ -70,14 +70,6 @@ jobs:
         cd terraform
         terraform init
 
-    - name: Terraform Plan
-      run: |
-        cd terraform
-        terraform plan \
-          -var="environment=${{ env.ENVIRONMENT }}" \
-          -var="image_tag=${{ github.sha }}" \
-          -out=tfplan
-
     - name: Terraform Destroy (Cleanup Previous Environment)
       run: |
         cd terraform
@@ -85,23 +77,18 @@ jobs:
           -var="environment=${{ env.ENVIRONMENT }}" \
           -var="image_tag=${{ github.sha }}" || true
 
-    - name: Build and push Docker image
-      run: |
-        # Get ACR login server from previous terraform state or use default naming
-        ACR_NAME="acr${ENVIRONMENT}neo4j$(echo ${{ github.sha }} | cut -c1-6)"
-        
-        # Build the Docker image
-        docker build -t neo4j-interview-app:${{ github.sha }} .
-        
-        # We'll tag and push after ACR is created in terraform apply
-
     - name: Terraform Apply
       run: |
         cd terraform
-        terraform apply -auto-approve tfplan
+        terraform apply -auto-approve \
+          -var="environment=${{ env.ENVIRONMENT }}" \
+          -var="image_tag=${{ github.sha }}"
 
-    - name: Get ACR credentials and push image
+    - name: Build and push Docker image
       run: |
+        # Build the Docker image
+        docker build -t neo4j-interview-app:${{ github.sha }} .
+        
         cd terraform
         
         # Get ACR details from terraform output
