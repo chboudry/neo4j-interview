@@ -101,11 +101,9 @@ jobs:
           -target=azurerm_storage_share.neo4j_data \
           -target=random_string.suffix
 
-    - name: Build and push Docker image
+    - name: Build and push Docker images
       run: |
-        echo "🐳 Building and pushing Docker image..."
-        # Build the Docker image
-        docker build -t neo4j-interview-app:${{ github.sha }} .
+        echo "🐳 Building and pushing Docker images..."
         
         cd terraform
         
@@ -118,10 +116,23 @@ jobs:
         # Login to ACR
         echo "$ACR_PASSWORD" | docker login $ACR_LOGIN_SERVER -u $ACR_USERNAME --password-stdin
         
-        # Tag and push the image
+        cd ..
+        
+        # Build and push the FastAPI application image
+        echo "📦 Building FastAPI application image..."
+        docker build -t neo4j-interview-app:${{ github.sha }} .
         docker tag neo4j-interview-app:${{ github.sha }} $ACR_LOGIN_SERVER/neo4j-interview-app:${{ github.sha }}
         docker push $ACR_LOGIN_SERVER/neo4j-interview-app:${{ github.sha }}
-        echo "✅ Image successfully pushed to ACR!"
+        echo "✅ FastAPI app image pushed to ACR!"
+        
+        # Pull, tag and push Neo4j image
+        echo "📦 Pulling and pushing Neo4j image..."
+        docker pull neo4j:5.13-community
+        docker tag neo4j:5.13-community $ACR_LOGIN_SERVER/neo4j:5.13-community
+        docker push $ACR_LOGIN_SERVER/neo4j:5.13-community
+        echo "✅ Neo4j image pushed to ACR!"
+        
+        echo "🎉 All images successfully pushed to ACR!"
 
     - name: Terraform Apply (Phase 2 - Containers)
       run: |

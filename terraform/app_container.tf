@@ -9,7 +9,7 @@ resource "azurerm_container_group" "neo4j" {
 
   container {
     name   = "neo4j"
-    image  = "neo4j:5.15-community"
+    image  = "${azurerm_container_registry.neo4j_interview.login_server}/neo4j:5.13-community"
     cpu    = "1"
     memory = "2"
 
@@ -37,6 +37,12 @@ resource "azurerm_container_group" "neo4j" {
       storage_account_name = azurerm_storage_account.neo4j_interview.name
       storage_account_key  = azurerm_storage_account.neo4j_interview.primary_access_key
     }
+  }
+
+  image_registry_credential {
+    server   = azurerm_container_registry.neo4j_interview.login_server
+    username = azurerm_container_registry.neo4j_interview.admin_username
+    password = azurerm_container_registry.neo4j_interview.admin_password
   }
 
   tags = {
