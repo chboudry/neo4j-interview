@@ -133,53 +133,6 @@ resource "random_string" "suffix" {
   upper   = false
 }
 
-# Neo4j Container Instance
-resource "azurerm_container_group" "neo4j" {
-  name                = "aci-neo4j-${var.environment}"
-  location            = azurerm_resource_group.neo4j_interview.location
-  resource_group_name = azurerm_resource_group.neo4j_interview.name
-  ip_address_type     = "Public"
-  dns_name_label      = "neo4j-${var.environment}-${random_string.suffix.result}"
-  os_type             = "Linux"
-
-  container {
-    name   = "neo4j"
-    image  = "neo4j:5.15-community"
-    cpu    = "1"
-    memory = "2"
-
-    ports {
-      port     = 7474
-      protocol = "TCP"
-    }
-
-    ports {
-      port     = 7687
-      protocol = "TCP"
-    }
-
-    environment_variables = {
-      NEO4J_AUTH                      = "neo4j/password"
-      NEO4J_PLUGINS                   = "[\"apoc\", \"graph-data-science\"]"
-      NEO4J_dbms_security_procedures_unrestricted = "apoc.*,gds.*"
-      NEO4J_dbms_security_procedures_allowlist    = "apoc.*,gds.*"
-    }
-
-    volume {
-      name       = "neo4j-data"
-      mount_path = "/data"
-      share_name = azurerm_storage_share.neo4j_data.name
-      storage_account_name = azurerm_storage_account.neo4j_interview.name
-      storage_account_key  = azurerm_storage_account.neo4j_interview.primary_access_key
-    }
-  }
-
-  tags = {
-    Environment = var.environment
-    Project     = "neo4j-interview"
-  }
-}
-
 # Storage account for Neo4j data persistence
 resource "azurerm_storage_account" "neo4j_interview" {
   name                     = "st${lower(replace(var.environment, "-", ""))}neo4j${random_string.suffix.result}"

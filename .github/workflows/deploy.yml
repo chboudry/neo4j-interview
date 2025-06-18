@@ -87,7 +87,7 @@ jobs:
     - name: Terraform Apply (Phase 1 - Infrastructure)
       run: |
         cd terraform
-        echo "🏗️ Phase 1: Deploying infrastructure (ACR, Neo4j, Storage)..."
+        echo "🏗️ Phase 1: Deploying infrastructure (ACR, Storage, Networking)..."
         terraform apply -auto-approve \
           -var="environment=${{ env.ENVIRONMENT }}" \
           -var="image_tag=${{ github.sha }}" \
@@ -99,8 +99,7 @@ jobs:
           -target=azurerm_container_registry.neo4j_interview \
           -target=azurerm_storage_account.neo4j_interview \
           -target=azurerm_storage_share.neo4j_data \
-          -target=random_string.suffix \
-          -target=azurerm_container_group.neo4j
+          -target=random_string.suffix
 
     - name: Build and push Docker image
       run: |
@@ -124,14 +123,14 @@ jobs:
         docker push $ACR_LOGIN_SERVER/neo4j-interview-app:${{ github.sha }}
         echo "✅ Image successfully pushed to ACR!"
 
-    - name: Terraform Apply (Phase 2 - App Container)
+    - name: Terraform Apply (Phase 2 - Containers)
       run: |
         cd terraform
-        echo "🚀 Phase 2: Deploying app container with ACR image..."
+        echo "🚀 Phase 2: Deploying Neo4j and App containers..."
         terraform apply -auto-approve \
           -var="environment=${{ env.ENVIRONMENT }}" \
           -var="image_tag=${{ github.sha }}"
-        echo "✅ App container deployed successfully!"
+        echo "✅ Neo4j and App containers deployed successfully!"
 
     - name: Wait for deployment and run health checks
       run: |
