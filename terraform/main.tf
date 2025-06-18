@@ -141,7 +141,6 @@ resource "azurerm_container_group" "neo4j" {
   ip_address_type     = "Public"
   dns_name_label      = "neo4j-${var.environment}-${random_string.suffix.result}"
   os_type             = "Linux"
-  subnet_ids          = [azurerm_subnet.neo4j_interview.id]
 
   container {
     name   = "neo4j"
@@ -189,7 +188,6 @@ resource "azurerm_container_group" "app" {
   ip_address_type     = "Public"
   dns_name_label      = "app-${var.environment}-${random_string.suffix.result}"
   os_type             = "Linux"
-  subnet_ids          = [azurerm_subnet.neo4j_interview.id]
 
   image_registry_credential {
     server   = azurerm_container_registry.neo4j_interview.login_server
