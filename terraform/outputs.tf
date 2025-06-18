@@ -24,8 +24,13 @@ output "app_ip_address" {
 }
 
 output "app_url" {
-  description = "URL to access the application"
+  description = "URL to access the API"
   value       = "http://${azurerm_container_group.app.fqdn}:8000"
+}
+
+output "frontend_url" {
+  description = "URL to access the frontend"
+  value       = "http://${azurerm_container_group.app.fqdn}:3000"
 }
 
 output "neo4j_browser_url" {

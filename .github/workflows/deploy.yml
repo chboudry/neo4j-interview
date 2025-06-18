@@ -147,27 +147,46 @@ jobs:
       run: |
         cd terraform
         
-        # Get application URL
+        # Get application URLs
         APP_URL=$(terraform output -raw app_url)
+        FRONTEND_URL=$(terraform output -raw frontend_url)
         NEO4J_URL=$(terraform output -raw neo4j_browser_url)
         
-        echo "Application URL: $APP_URL"
+        echo "API URL: $APP_URL"
+        echo "Frontend URL: $FRONTEND_URL"
         echo "Neo4j Browser URL: $NEO4J_URL"
         
-        # Wait for services to be ready (up to 10 minutes)
+        # Wait for services to be ready (up to 15 minutes for multi-service container)
         echo "Waiting for services to be ready..."
-        for i in {1..60}; do
+        for i in {1..90}; do
+          API_READY=false
+          FRONTEND_READY=false
+          
           if curl -f "$APP_URL/health" > /dev/null 2>&1; then
-            echo "✅ Application is healthy!"
+            API_READY=true
+          fi
+          
+          if curl -f "$FRONTEND_URL" > /dev/null 2>&1; then
+            FRONTEND_READY=true
+          fi
+          
+          if [ "$API_READY" = true ] && [ "$FRONTEND_READY" = true ]; then
+            echo "✅ Both API and Frontend are healthy!"
             break
           fi
-          echo "⏳ Waiting for application... (attempt $i/60)"
+          
+          echo "⏳ Waiting for services... API: $API_READY, Frontend: $FRONTEND_READY (attempt $i/90)"
           sleep 10
         done
         
-        # Final health check
+        # Final health checks
         if ! curl -f "$APP_URL/health"; then
-          echo "❌ Application health check failed"
+          echo "❌ API health check failed"
+          exit 1
+        fi
+        
+        if ! curl -f "$FRONTEND_URL"; then
+          echo "❌ Frontend health check failed"
           exit 1
         fi
 
@@ -175,16 +194,19 @@ jobs:
       run: |
         cd terraform
         
-        # Get application URL
+        # Get application URLs
         APP_URL=$(terraform output -raw app_url)
+        FRONTEND_URL=$(terraform output -raw frontend_url)
         
-        echo "Running integration tests against $APP_URL"
+        echo "Running integration tests..."
+        echo "API: $APP_URL"
+        echo "Frontend: $FRONTEND_URL"
         
         # Test API endpoints
-        echo "Testing root endpoint..."
+        echo "Testing API root endpoint..."
         curl -f "$APP_URL/" || exit 1
         
-        echo "Testing health endpoint..."
+        echo "Testing API health endpoint..."
         curl -f "$APP_URL/health" || exit 1
         
         echo "Testing employees endpoint..."
@@ -192,6 +214,10 @@ jobs:
         
         echo "Testing graph endpoint..."
         curl -f "$APP_URL/graph" || exit 1
+        
+        # Test Frontend
+        echo "Testing frontend homepage..."
+        curl -f "$FRONTEND_URL" || exit 1
         
         echo "✅ All integration tests passed!"
 
@@ -205,7 +231,8 @@ jobs:
         echo "Commit SHA: ${{ github.sha }}"
         echo ""
         echo "🔗 Service URLs:"
-        echo "Application: $(terraform output -raw app_url)"
+        echo "API: $(terraform output -raw app_url)"
+        echo "Frontend: $(terraform output -raw frontend_url)"
         echo "Neo4j Browser: $(terraform output -raw neo4j_browser_url)"
         echo ""
         echo "🏷️ Resource Group: $(terraform output -raw resource_group_name)"

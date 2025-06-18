@@ -67,13 +67,18 @@ resource "azurerm_container_group" "app" {
   }
 
   container {
-    name   = "fastapi-app"
+    name   = "fullstack-app"
     image  = "${azurerm_container_registry.neo4j_interview.login_server}/neo4j-interview-app:${var.image_tag}"
-    cpu    = "1"
-    memory = "1.5"
+    cpu    = "2"
+    memory = "3"
 
     ports {
       port     = 8000
+      protocol = "TCP"
+    }
+
+    ports {
+      port     = 3000
       protocol = "TCP"
     }
 
