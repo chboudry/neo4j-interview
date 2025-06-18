@@ -65,7 +65,7 @@ class Neo4jClient:
             result = session.run("""
                 MATCH (e:Employee)
                 RETURN e.name as name, 
-                       e.id as id, 
+                       e.emp_id as emp_id, 
                        e.email as email,
                        e.department as department,
                        e.position as position
@@ -76,7 +76,7 @@ class Neo4jClient:
             for record in result:
                 employee_data = {
                     "name": record["name"],
-                    "id": record["id"],
+                    "emp_id": record["emp_id"],
                     "email": record["email"],
                     "department": record["department"],
                     "position": record["position"]
@@ -87,6 +87,33 @@ class Neo4jClient:
             
             return employees
     
+    def ensure_unique_constraints(self):
+        """Set up database constraints for unique employee IDs"""
+        with self.driver.session(database=self.database) as session:
+            try:
+                session.run("CREATE CONSTRAINT emp_id FOR (e:Employee) REQUIRE e.emp_id IS UNIQUE")
+            except Exception as e:
+                print(f"Constraints may already exist: {e}")
+
+
+    def create_employee(self, employee: Employee):
+        """Create a new employee node in the Neo4j database"""
+        with self.driver.session(database=self.database) as session:
+            session.run("""
+                 CREATE (e:Employee {
+                    emp_id: $emp_id,
+                    name: $name,
+                    email: $email,
+                    department: $department,
+                    position: $position
+                })
+            """, 
+            name=employee.name, 
+            emp_id=employee.emp_id, 
+            email=employee.email, 
+            department=employee.department, 
+            position=employee.position)
+
     def get_employees_with_relationships(self) -> List[EmployeeWithRelationships]:
         """Fetch all employees with their relationships"""
         with self.driver.session(database=self.database) as session:
@@ -96,7 +123,7 @@ class Neo4jClient:
                 OPTIONAL MATCH (subordinate:Employee)-[:REPORTS_TO]->(e)
                 OPTIONAL MATCH (e)-[:FRIENDS_WITH]-(friend:Employee)
                 RETURN e.name as name,
-                       e.id as id,
+                       e.emp_id as emp_id,
                        e.email as email,
                        e.department as department,
                        e.position as position,
@@ -111,7 +138,7 @@ class Neo4jClient:
             for record in result:
                 employee_data = {
                     "name": record["name"],
-                    "id": record["id"],
+                    "emp_id": record["emp_id"],
                     "email": record["email"],
                     "department": record["department"],
                     "position": record["position"],
@@ -191,9 +218,7 @@ class Neo4jClient:
                     # Create employee and boss nodes if they don't exist
                     session.run("""
                         MERGE (emp:Employee {name: $employee_name})
-                        SET emp.id = $employee_name
                         MERGE (boss:Employee {name: $boss_name})
-                        SET boss.id = $boss_name
                         MERGE (emp)-[:REPORTS_TO]->(boss)
                     """, employee_name=employee_name, boss_name=boss_name)
         
@@ -216,9 +241,9 @@ class Neo4jClient:
                     # Create employee and friend nodes if they don't exist
                     session.run("""
                         MERGE (emp:Employee {name: $employee_name})
-                        SET emp.id = $employee_name
+                        //SET emp.id = $employee_name
                         MERGE (friend:Employee {name: $friend_name})
-                        SET friend.id = $friend_name
+                        //SET friend.id = $friend_name
                         MERGE (emp)-[:FRIENDS_WITH]->(friend)
                     """, employee_name=employee_name, friend_name=friend_name)
         
@@ -239,7 +264,62 @@ class Neo4jClient:
         except Exception as e:
             print(f"Error loading CSV data: {e}")
             # Fallback to sample data if CSV loading fails   
+    def get_graph_data(self) -> dict:
+        """Get graph data in NVL format with nodes and relationships"""
+        with self.driver.session(database=self.database) as session:
+            # Get nodes (employees)
+            nodes_result = session.run("""
+                MATCH (e:Employee)
+                RETURN e.emp_id as id,
+                       e.name as name,
+                       e.department as department,
+                       e.position as position,
+                       e.email as email
+                ORDER BY e.name
+            """)
+            
+            nodes = []
+            for record in nodes_result:
+                node = {
+                    "id": str(record["id"]) if record["id"] is not None else record["name"].replace(" ", "_"),
+                    "name": record["name"],
+                    "department": record["department"],
+                    "position": record["position"],
+                    "email": record["email"]
+                }
+                # Remove None values
+                node = {k: v for k, v in node.items() if v is not None}
+                nodes.append(node)
+            
+            # Get relationships
+            rels_result = session.run("""
+                MATCH (a:Employee)-[r]->(b:Employee)
+                RETURN a.emp_id as from_id,
+                       a.name as from_name,
+                       b.emp_id as to_id,
+                       b.name as to_name,
+                       TYPE(r) as rel_type,
+                       id(r) as rel_id
+                ORDER BY a.name, b.name
+            """)
+            
+            relationships = []
+            for record in rels_result:
+                from_id = str(record["from_id"]) if record["from_id"] is not None else record["from_name"].replace(" ", "_")
+                to_id = str(record["to_id"]) if record["to_id"] is not None else record["to_name"].replace(" ", "_")
+                
+                rel = {
+                    "id": str(record["rel_id"]),
+                    "from": from_id,
+                    "to": to_id,
+                    "type": record["rel_type"]
+                }
+                relationships.append(rel)
+            
+            return {
+                "nodes": nodes,
+                "relationships": relationships
+            }
 
-
-# Global instance
+# Create a global instance for use across the application
 neo4j_client = Neo4jClient()

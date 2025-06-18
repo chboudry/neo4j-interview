@@ -75,7 +75,12 @@ RETURN formal as FormalCommunity,
 ORDER BY OverlapSize DESC
 ```
 
-## 4. Employees Bridging Communities
+# Advice to HR 
+
+## 1. High Value Employees to Retain 
+
+### a. Employees Bridging Communities
+
 Find employees who span different community types
 ```cypher
 MATCH (e:Employee)
@@ -88,3 +93,13 @@ RETURN formal as FormalCommunity,
        employees[0] as BridgingEmployee
 ORDER BY formal, informal
 ```
+
+### b. Informal Leaders
+
+## 2. At Risk Situations
+
+### a. Isolated Managers (no friendship)
+
+### b. Disconnected high Performers
+
+We could detect isolated person but we lack data to identify the profile we want to keep

@@ -3,3 +3,4 @@ neo4j==5.14.1
 pydantic==2.8.1
 python-dotenv==1.0.0
 pytest==8.3.4
+yfiles-jupyter-graphs==1.10.7

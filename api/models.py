@@ -6,7 +6,7 @@ from datetime import datetime
 class Employee(BaseModel):
     """Basic employee node"""
     name: str
-    id: Optional[str] = None  # Can be auto-generated from name
+    emp_id: Optional[int] = None  # Can be auto-generated from name
     email: Optional[str] = None
     department: Optional[str] = None
     position: Optional[str] = None
@@ -53,3 +53,27 @@ class EmployeeNetworkResponse(BaseModel):
     """Complete employee network with relationships"""
     employees: List[EmployeeWithRelationships]
     total: int
+
+
+# NVL Graph Models
+class NVLNode(BaseModel):
+    """Node model for NVL visualization"""
+    id: str
+    name: Optional[str] = None
+    department: Optional[str] = None
+    position: Optional[str] = None
+    email: Optional[str] = None
+
+
+class NVLRelationship(BaseModel):
+    """Relationship model for NVL visualization"""
+    id: str
+    from_node: str
+    to: str
+    type: Optional[str] = None
+
+
+class GraphData(BaseModel):
+    """Complete graph data for NVL visualization"""
+    nodes: List[NVLNode]
+    relationships: List[NVLRelationship]

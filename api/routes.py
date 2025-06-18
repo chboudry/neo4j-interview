@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models import Employee, Relationship, BossRelationship, FriendshipRelationship, EmployeeResponse, RelationshipResponse, EmployeeNetworkResponse
+from models import Employee, Relationship, BossRelationship, FriendshipRelationship, EmployeeResponse, RelationshipResponse, EmployeeNetworkResponse, GraphData
 from database import neo4j_client
 
 
@@ -37,6 +37,17 @@ async def list_employees():
         return EmployeeResponse(employees=employees, total=len(employees))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch employees: {str(e)}")
+    
+@routes.get("/employees-with-relationship", response_model=EmployeeNetworkResponse)
+async def get_employee_network():
+    """
+    Get the complete employee network including all relationship data
+    """
+    try:
+        employee_network = neo4j_client.get_employees_with_relationships()
+        return EmployeeNetworkResponse(employees=employee_network, total=len(employee_network))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch employee network: {str(e)}")
 
 
 @routes.get("/relationships", response_model=RelationshipResponse)
@@ -49,15 +60,27 @@ async def list_relationships():
         return RelationshipResponse(relationships=relationships, total=len(relationships))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch relationships: {str(e)}")
-
-
-@routes.get("/employee-network", response_model=EmployeeNetworkResponse)
-async def get_employee_network():
+    
+@routes.post("/employees", response_model=EmployeeResponse)
+async def create_employee(employee: Employee):
     """
-    Get the complete employee network including all relationship data
+    Create a new employee in the Neo4j database
     """
     try:
-        employee_network = neo4j_client.get_employees_with_relationships()
-        return EmployeeNetworkResponse(employees=employee_network, total=len(employee_network))
+        neo4j_client.create_employee(employee)
+        return EmployeeResponse(employees=[employee], total=1)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch employee network: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create employee: {str(e)}")
+    
+@routes.get("/graph")
+async def get_graph_data():
+    """
+    Get graph data in NVL format for visualization
+    """
+    try:
+        graph_data = neo4j_client.get_graph_data()
+        return graph_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch graph data: {str(e)}")
+
+

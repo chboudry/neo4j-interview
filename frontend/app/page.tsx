@@ -1,50 +1,26 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-
-interface Employee {
-  id: string
-  name: string
-  email: string
-  department: string
-  position: string
-}
-
 export default function Home() {
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch('/api/employees')
-      .then(res => res.json())
-      .then(data => {
-        setEmployees(data.employees || [])
-        setLoading(false)
-      })
-      .catch(err => {
-        console.error('Error fetching employees:', err)
-        setLoading(false)
-      })
-  }, [])
-
-  if (loading) {
-    return <div className="container">Loading...</div>
-  }
-
   return (
     <div className="container">
-      <h1>Neo4j Interview Project</h1>
-      <h2>Employees ({employees.length})</h2>
-      
-      <div className="employees-grid">
-        {employees.map(employee => (
-          <div key={employee.id} className="employee-card">
-            <h3>{employee.name}</h3>
-            <p><strong>Email:</strong> {employee.email}</p>
-            <p><strong>Department:</strong> {employee.department}</p>
-            <p><strong>Position:</strong> {employee.position}</p>
+      <div className="hero">
+        <h1>Hello! Welcome to Neo4j Interview Project</h1>
+        <p>This is a full-stack application showcasing Neo4j graph database integration with a modern React frontend.</p>
+        
+        <div className="features">
+          <div className="feature-card">
+            <h3>📊 Employee Management</h3>
+            <p>Browse and manage employee data stored in Neo4j</p>
           </div>
-        ))}
+          
+          <div className="feature-card">
+            <h3>🕸️ Graph Visualization</h3>
+            <p>Interactive graph visualization of relationships between employees</p>
+          </div>
+          
+          <div className="feature-card">
+            <h3>🔗 Relationship Analysis</h3>
+            <p>Explore reporting structures and social connections</p>
+          </div>
+        </div>
       </div>
     </div>
   )
