@@ -6,7 +6,7 @@ WORKDIR /frontend
 
 # Copy Next.js package files
 COPY frontend/package*.json ./
-RUN npm ci --only=production
+RUN npm install
 
 # Copy Next.js source code
 COPY frontend/ .
@@ -42,8 +42,12 @@ COPY dataset/ ./dataset/
 COPY --from=nextjs-build /frontend/.next ./frontend/.next
 COPY --from=nextjs-build /frontend/public ./frontend/public
 COPY --from=nextjs-build /frontend/package*.json ./frontend/
-COPY --from=nextjs-build /frontend/node_modules ./frontend/node_modules
 COPY frontend/next.config.ts ./frontend/
+
+# Install only production dependencies for Next.js runtime
+WORKDIR /app/frontend
+RUN npm install --omit=dev
+WORKDIR /app
 
 # Create a non-root user
 RUN useradd --create-home --shell /bin/bash app && \
