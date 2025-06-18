@@ -114,7 +114,7 @@ resource "azurerm_subnet_network_security_group_association" "neo4j_interview" {
 
 # Create Azure Container Registry
 resource "azurerm_container_registry" "neo4j_interview" {
-  name                = "acr${replace(var.environment, "-", "")}neo4j${random_string.suffix.result}"
+  name                = "acr${lower(replace(var.environment, "-", ""))}neo4j${random_string.suffix.result}"
   resource_group_name = azurerm_resource_group.neo4j_interview.name
   location            = azurerm_resource_group.neo4j_interview.location
   sku                 = "Basic"
@@ -226,7 +226,7 @@ resource "azurerm_container_group" "app" {
 
 # Storage account for Neo4j data persistence
 resource "azurerm_storage_account" "neo4j_interview" {
-  name                     = "st${replace(var.environment, "-", "")}neo4j${random_string.suffix.result}"
+  name                     = "st${lower(replace(var.environment, "-", ""))}neo4j${random_string.suffix.result}"
   resource_group_name      = azurerm_resource_group.neo4j_interview.name
   location                 = azurerm_resource_group.neo4j_interview.location
   account_tier             = "Standard"
