@@ -77,15 +77,34 @@ jobs:
           -var="environment=${{ env.ENVIRONMENT }}" \
           -var="image_tag=${{ github.sha }}" || true
 
-    - name: Terraform Apply
+    - name: Terraform Plan (Infrastructure)
       run: |
         cd terraform
-        terraform apply -auto-approve \
+        terraform plan \
           -var="environment=${{ env.ENVIRONMENT }}" \
           -var="image_tag=${{ github.sha }}"
 
+    - name: Terraform Apply (Phase 1 - Infrastructure)
+      run: |
+        cd terraform
+        echo "🏗️ Phase 1: Deploying infrastructure (ACR, Neo4j, Storage)..."
+        terraform apply -auto-approve \
+          -var="environment=${{ env.ENVIRONMENT }}" \
+          -var="image_tag=${{ github.sha }}" \
+          -target=azurerm_resource_group.neo4j_interview \
+          -target=azurerm_virtual_network.neo4j_interview \
+          -target=azurerm_subnet.neo4j_interview \
+          -target=azurerm_network_security_group.neo4j_interview \
+          -target=azurerm_subnet_network_security_group_association.neo4j_interview \
+          -target=azurerm_container_registry.neo4j_interview \
+          -target=azurerm_storage_account.neo4j_interview \
+          -target=azurerm_storage_share.neo4j_data \
+          -target=random_string.suffix \
+          -target=azurerm_container_group.neo4j
+
     - name: Build and push Docker image
       run: |
+        echo "🐳 Building and pushing Docker image..."
         # Build the Docker image
         docker build -t neo4j-interview-app:${{ github.sha }} .
         
@@ -96,12 +115,23 @@ jobs:
         ACR_USERNAME=$(terraform output -raw container_registry_admin_username)
         ACR_PASSWORD=$(terraform output -raw container_registry_admin_password)
         
+        echo "🔐 Logging into ACR: $ACR_LOGIN_SERVER"
         # Login to ACR
         echo "$ACR_PASSWORD" | docker login $ACR_LOGIN_SERVER -u $ACR_USERNAME --password-stdin
         
         # Tag and push the image
         docker tag neo4j-interview-app:${{ github.sha }} $ACR_LOGIN_SERVER/neo4j-interview-app:${{ github.sha }}
         docker push $ACR_LOGIN_SERVER/neo4j-interview-app:${{ github.sha }}
+        echo "✅ Image successfully pushed to ACR!"
+
+    - name: Terraform Apply (Phase 2 - App Container)
+      run: |
+        cd terraform
+        echo "🚀 Phase 2: Deploying app container with ACR image..."
+        terraform apply -auto-approve \
+          -var="environment=${{ env.ENVIRONMENT }}" \
+          -var="image_tag=${{ github.sha }}"
+        echo "✅ App container deployed successfully!"
 
     - name: Wait for deployment and run health checks
       run: |
