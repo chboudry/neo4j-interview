@@ -47,6 +47,10 @@ services:
 
 volumes:
   neo4j_data:
+    #driver : local
+    #driver_opts:
+    #  type: tmpfs
+    #  device: tmpfs
   neo4j_logs:
   neo4j_import:
   neo4j_plugins:

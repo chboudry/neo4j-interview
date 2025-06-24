@@ -1,0 +1,382 @@
+{
+  "version": "2.3.1-beta.0",
+  "visualisation": {
+    "nodes": [
+      {
+        "id": "n:1",
+        "position": {
+          "x": -26,
+          "y": 9.333333333333334
+        }
+      },
+      {
+        "id": "n:2",
+        "position": {
+          "x": 108.83333333333333,
+          "y": 9.833333333333321
+        }
+      },
+      {
+        "id": "n:3",
+        "position": {
+          "x": 47.16487591330372,
+          "y": -91.86208114514817
+        }
+      }
+    ]
+  },
+  "dataModel": {
+    "version": "2.3.1-beta.0",
+    "graphSchemaRepresentation": {
+      "version": "1.0.0",
+      "graphSchema": {
+        "nodeLabels": [
+          {
+            "$id": "nl:1",
+            "token": "employee",
+            "properties": [
+              {
+                "$id": "p:2",
+                "token": "name",
+                "type": {
+                  "type": "string"
+                },
+                "nullable": true
+              }
+            ]
+          },
+          {
+            "$id": "nl:2",
+            "token": "employee",
+            "properties": [
+              {
+                "$id": "p:1",
+                "token": "name",
+                "type": {
+                  "type": "string"
+                },
+                "nullable": true
+              }
+            ]
+          },
+          {
+            "$id": "nl:3",
+            "token": "employee",
+            "properties": [
+              {
+                "$id": "p:4",
+                "token": "name",
+                "type": {
+                  "type": "string"
+                },
+                "nullable": true
+              }
+            ]
+          }
+        ],
+        "relationshipTypes": [
+          {
+            "$id": "rt:1",
+            "token": "REPORTS_TO",
+            "properties": []
+          },
+          {
+            "$id": "rt:2",
+            "token": "FRIENDS_WITH",
+            "properties": []
+          }
+        ],
+        "nodeObjectTypes": [
+          {
+            "$id": "n:1",
+            "labels": [
+              {
+                "$ref": "#nl:1"
+              }
+            ]
+          },
+          {
+            "$id": "n:2",
+            "labels": [
+              {
+                "$ref": "#nl:2"
+              }
+            ]
+          },
+          {
+            "$id": "n:3",
+            "labels": [
+              {
+                "$ref": "#nl:3"
+              }
+            ]
+          }
+        ],
+        "relationshipObjectTypes": [
+          {
+            "$id": "r:1",
+            "type": {
+              "$ref": "#rt:1"
+            },
+            "from": {
+              "$ref": "#n:1"
+            },
+            "to": {
+              "$ref": "#n:2"
+            }
+          },
+          {
+            "$id": "r:2",
+            "type": {
+              "$ref": "#rt:2"
+            },
+            "from": {
+              "$ref": "#n:1"
+            },
+            "to": {
+              "$ref": "#n:3"
+            }
+          }
+        ],
+        "constraints": [
+          {
+            "$id": "c:1",
+            "name": "name_employee_uniq",
+            "constraintType": "uniqueness",
+            "entityType": "node",
+            "nodeLabel": {
+              "$ref": "#nl:1"
+            },
+            "properties": [
+              {
+                "$ref": "#p:2"
+              }
+            ]
+          },
+          {
+            "$id": "c:2",
+            "name": "name_employee_uniq",
+            "constraintType": "uniqueness",
+            "entityType": "node",
+            "nodeLabel": {
+              "$ref": "#nl:2"
+            },
+            "properties": [
+              {
+                "$ref": "#p:1"
+              }
+            ]
+          },
+          {
+            "$id": "c:3",
+            "name": "name_employee_uniq",
+            "constraintType": "uniqueness",
+            "entityType": "node",
+            "nodeLabel": {
+              "$ref": "#nl:3"
+            },
+            "properties": [
+              {
+                "$ref": "#p:4"
+              }
+            ]
+          }
+        ],
+        "indexes": [
+          {
+            "$id": "i:1",
+            "name": "name_employee_uniq",
+            "indexType": "default",
+            "entityType": "node",
+            "nodeLabel": {
+              "$ref": "#nl:1"
+            },
+            "properties": [
+              {
+                "$ref": "#p:2"
+              }
+            ]
+          },
+          {
+            "$id": "i:2",
+            "name": "name_employee_uniq",
+            "indexType": "default",
+            "entityType": "node",
+            "nodeLabel": {
+              "$ref": "#nl:2"
+            },
+            "properties": [
+              {
+                "$ref": "#p:1"
+              }
+            ]
+          },
+          {
+            "$id": "i:3",
+            "name": "name_employee_uniq",
+            "indexType": "default",
+            "entityType": "node",
+            "nodeLabel": {
+              "$ref": "#nl:3"
+            },
+            "properties": [
+              {
+                "$ref": "#p:4"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "graphSchemaExtensionsRepresentation": {
+      "nodeKeyProperties": [
+        {
+          "node": {
+            "$ref": "#n:1"
+          },
+          "keyProperty": {
+            "$ref": "#p:2"
+          }
+        },
+        {
+          "node": {
+            "$ref": "#n:2"
+          },
+          "keyProperty": {
+            "$ref": "#p:1"
+          }
+        },
+        {
+          "node": {
+            "$ref": "#n:3"
+          },
+          "keyProperty": {
+            "$ref": "#p:4"
+          }
+        }
+      ]
+    },
+    "graphMappingRepresentation": {
+      "dataSourceSchema": {
+        "type": "local",
+        "tableSchemas": [
+          {
+            "name": "employees-and-their-boss.csv",
+            "expanded": true,
+            "fields": [
+              {
+                "name": "employee name",
+                "sample": "Bradley",
+                "recommendedType": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "has boss",
+                "sample": "Darth Vader",
+                "recommendedType": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          {
+            "name": "employees-and-their-friends.csv",
+            "expanded": true,
+            "fields": [
+              {
+                "name": "employee name",
+                "sample": "Kelly",
+                "recommendedType": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "is friends with",
+                "sample": "Nelson",
+                "recommendedType": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "nodeMappings": [
+        {
+          "node": {
+            "$ref": "#n:1"
+          },
+          "tableName": "employees-and-their-boss.csv",
+          "propertyMappings": [
+            {
+              "fieldName": "employee name",
+              "property": {
+                "$ref": "#p:2"
+              }
+            }
+          ]
+        },
+        {
+          "node": {
+            "$ref": "#n:2"
+          },
+          "tableName": "employees-and-their-boss.csv",
+          "propertyMappings": [
+            {
+              "fieldName": "has boss",
+              "property": {
+                "$ref": "#p:1"
+              }
+            }
+          ]
+        },
+        {
+          "node": {
+            "$ref": "#n:3"
+          },
+          "tableName": "employees-and-their-friends.csv",
+          "propertyMappings": [
+            {
+              "fieldName": "is friends with",
+              "property": {
+                "$ref": "#p:4"
+              }
+            }
+          ]
+        }
+      ],
+      "relationshipMappings": [
+        {
+          "relationship": {
+            "$ref": "#r:1"
+          },
+          "tableName": "employees-and-their-boss.csv",
+          "propertyMappings": [],
+          "fromMapping": {
+            "fieldName": "employee name"
+          },
+          "toMapping": {
+            "fieldName": "has boss"
+          }
+        },
+        {
+          "relationship": {
+            "$ref": "#r:2"
+          },
+          "tableName": "employees-and-their-friends.csv",
+          "propertyMappings": [],
+          "fromMapping": {
+            "fieldName": "employee name"
+          },
+          "toMapping": {
+            "fieldName": "is friends with"
+          }
+        }
+      ]
+    },
+    "configurations": {
+      "idsToIgnore": []
+    }
+  }
+}

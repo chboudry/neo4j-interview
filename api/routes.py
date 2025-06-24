@@ -6,18 +6,18 @@ from database import neo4j_client
 routes = APIRouter()
 
 @routes.get("/")
-async def root():
+def root():
     return {"message": "Welcome to Neo4j Interview API"}
 
 
 @routes.get("/health")
-async def health():
+def health():
     return {"status": "healthy"}
 
 
 # Optionally seed sample data on startup
 @routes.post("/seed")
-async def seed_data():
+def seed_data():
     """
     Seed the Neo4j database with sample data
     """
@@ -28,7 +28,7 @@ async def seed_data():
         raise HTTPException(status_code=500, detail=f"Failed to seed sample data: {str(e)}")
     
 @routes.get("/employees", response_model=EmployeeResponse)
-async def list_employees():
+def list_employees():
     """
     Get all employees from the Neo4j database
     """
@@ -39,7 +39,7 @@ async def list_employees():
         raise HTTPException(status_code=500, detail=f"Failed to fetch employees: {str(e)}")
     
 @routes.get("/employees-with-relationship", response_model=EmployeeNetworkResponse)
-async def get_employee_network():
+def get_employee_network():
     """
     Get the complete employee network including all relationship data
     """
@@ -51,7 +51,7 @@ async def get_employee_network():
 
 
 @routes.get("/relationships", response_model=RelationshipResponse)
-async def list_relationships():
+def list_relationships():
     """
     Get all relationships (boss and friendship) from the Neo4j database
     """
@@ -62,7 +62,7 @@ async def list_relationships():
         raise HTTPException(status_code=500, detail=f"Failed to fetch relationships: {str(e)}")
     
 @routes.post("/employees", response_model=EmployeeResponse)
-async def create_employee(employee: Employee):
+def create_employee(employee: Employee):
     """
     Create a new employee in the Neo4j database
     """
@@ -73,7 +73,7 @@ async def create_employee(employee: Employee):
         raise HTTPException(status_code=500, detail=f"Failed to create employee: {str(e)}")
     
 @routes.get("/graph")
-async def get_graph_data():
+def get_graph_data():
     """
     Get graph data in NVL format for visualization
     """

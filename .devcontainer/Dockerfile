@@ -18,7 +18,7 @@ COPY api/requirements.txt /tmp/
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Copy and install Node.js dependencies
-COPY frontend/package*.json frontend/.npmrc /tmp/frontend/
+COPY frontend/package*.json /tmp/frontend/
 WORKDIR /tmp/frontend
 RUN npm install --legacy-peer-deps
 
